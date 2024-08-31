@@ -1,0 +1,18 @@
+#grid {
+    width: 240px;
+    height: 480px;
+    background-color: aquamarine;
+    display: flex;
+    flex-wrap: wrap;
+}
+ 
+.atom-box {
+    background-color: rgb(102, 148, 167);
+    width: 20px;
+    border: 0.1px solid gray;
+    margin: 1px;
+}
+
+.tetromino {
+    background-color: rgb(223, 40, 40);
+}
