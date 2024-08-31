@@ -47,17 +47,17 @@ const randomIntFromRange = (min, max) => {
 
 const randomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)]
-}
-
-
-
- 
+} 
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
     init()
 })
+
+const friction = 0.95
+const gravity = 1
+// Objects
 
   
 class Ball{
@@ -68,8 +68,7 @@ class Ball{
         this.dY = dY
         this.radius = radius
         this.color = color;
-        this.defaultRadius = radius;
-
+        this.defaultRadius = radius; 
     }
 
     draw() {
@@ -82,14 +81,14 @@ class Ball{
     update() {
         if(this.x + this.radius > innerWidth || this.x - this.radius < 0){
             this.dX = -this.dX 
-            this.dY = this.dY*0.95
+            this.dY = this.dY * friction
         }
     
         if(this.y + this.radius > innerHeight || this.y - this.radius < 0){
-            this.dY = -this.dY*0.95
-            this.dX = this.dX*0.95
+            this.dY = -this.dY * friction
+            this.dX = this.dX * friction
         }else{
-            this.dY ++
+            this.dY = this.dY + gravity
         }
         
     
@@ -113,15 +112,15 @@ const animate = () => {
 
 const init = () => { 
     circleArray = []
-    // for(let i = 0; i < 100; i++){
-    //     var radius = randomIntFromRange(10, 50)
-    //     var x = randomIntFromRange(radius, canvas.width - radius)
-    //     var y = randomIntFromRange(radius, canvas.height - radius)
-    //     var dX = randomIntFromRange(-2, 2)
-    //     var dY = randomIntFromRange(-2, 2)
-    //     var color = randomColor()
-    //     circleArray.push(new Ball(x, y, dX, dY, radius, color))
-    // }
+    for(let i = 0; i < 100; i++){
+        var radius = randomIntFromRange(10, 50)
+        var x = randomIntFromRange(radius, canvas.width - radius)
+        var y = randomIntFromRange(radius, canvas.height - radius)
+        var dX = randomIntFromRange(-2, 2)
+        var dY = randomIntFromRange(-2, 2)
+        var color = randomColor()
+        circleArray.push(new Ball(x, y, dX, dY, radius, color))
+    }
     var ball = new Ball(50, 50, 3, 3, 50, colors[Math.floor(Math.random() * colors.length)])
     circleArray.push(ball)
     animate()
