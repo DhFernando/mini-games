@@ -1,5 +1,5 @@
 var canvas = document.querySelector('canvas')
- 
+
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
@@ -48,35 +48,119 @@ const randomIntFromRange = (min, max) => {
 const randomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)]
 }
-
-
-
  
-
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
     init()
 })
 
- 
+
+const calculateDistance = (x1, y1, x2, y2) => {
+    const dx = x1 - x2
+    const dy = y1 - y2
+    return Math.sqrt(dx * dx + dy * dy)
+}
 
 
-class Ball{
+class Enemy{
+    constructor(x, y, dX, dY, radius, color){
+        this.x = x
+        this.y = y
+        this.dX = dX
+        this.dY = dY
+        this.radius = radius
+        this.color = color;
+        this.defaultRadius = radius;
+        this.defaultColor = color;
+    } 
+    draw(){
+        c.beginPath()
+        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+        c.fillStyle = this.color
+        c.stroke()
+        c.fill()
+        c.closePath()
+    }
+
+    // interactivity(){
+    //     if(Math.abs(this.x - mouseCoords.x ) < this.radius + 50 && Math.abs(this.y - mouseCoords.y) < this.radius + 50){
+    //         if(this.radius < 50){
+    //             this.radius += 1
+    //         }
+    //     }else{
+    //         if(this.radius !== this.defaultRadius){
+    //             this.radius = this.defaultRadius
+    //         }
+    //     }
+    // }
+
+    update(){
+        if(this.x + this.radius > innerWidth || this.x - this.radius < 0){
+            this.dX = -this.dX
+        }
     
-} 
+        if(this.y + this.radius > innerHeight || this.y - this.radius < 0){
+            this.dY = -this.dY
+        }
+        
+    
+        this.x = this.x + this.dX
+        this.y = this.y + this.dY
+
+        let d = calculateDistance(this.x, this.y, mouseCoords.x, mouseCoords.y)
+
+        if(d < 40 + this.radius){
+            this.color = 'green'
+        }else{
+            this.color = this.defaultColor
+        
+        }
+        // this.interactivity()
+        this.draw()
+    } 
+}
+
+
+const mouseCoords = {
+    x: undefined,
+    y: undefined
+}
+
+window.addEventListener('mousemove', (event) => {
+    console.log(event)
+    mouseCoords.x = event.clientX
+    mouseCoords.y = event.clientY
+})
+class Player{ 
+    draw(){
+        c.beginPath()
+        c.arc(mouseCoords.x, mouseCoords.y, 40, 0, Math.PI * 2, false)
+        c.fillStyle = 'red'
+        c.stroke()
+        c.fill()
+        c.closePath()
+    } 
+    update(){ 
+        // this.interactivity()
+        this.draw()
+    } 
+}
  
-let circleArray = [] 
+ 
+let enemy;
+let player;
 // Animation
 const animate = () => {
     c.clearRect(0, 0, innerWidth, innerHeight)
     requestAnimationFrame(animate) 
-    
+    enemy.update()
+    player.update() 
 }
 
 const init = () => {
-     
+     enemy = new Enemy(100, 100, 1, 1, 20, colors[Math.floor(Math.random() * colors.length)])
+     player = new Player() 
     animate()
-}
-
+} 
 init()
