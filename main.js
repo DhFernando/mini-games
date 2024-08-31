@@ -47,6 +47,12 @@ const mouseCoords = {
     y: undefined
 }
 
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+    init()
+})
+
 window.addEventListener('mousemove', (e) => {
     mouseCoords.x = e.x
     mouseCoords.y = e.y
@@ -102,16 +108,7 @@ class Circle{
     } 
 } 
  
-let circleArray = []
-for(let i = 0; i < 800; i++){
-    let x = Math.random() * innerWidth
-    let y = Math.random() * innerHeight
-    let dX = (Math.random() - 0.5) * 2
-    let dY = (Math.random() - 0.5) * 2
-    let radius = Math.floor(Math.random() * (10 - 2 + 1)) + 2 // max radius 2 - 10
-    circleArray.push(new Circle(x, y, dX, dY, radius, colors[Math.floor(Math.random() * colors.length)]))
-}
-
+let circleArray = [] 
 // Animation
 const animate = () => {
     c.clearRect(0, 0, innerWidth, innerHeight)
@@ -121,4 +118,17 @@ const animate = () => {
     });
 }
 
-animate()
+const init = () => {
+    circleArray = []
+    for(let i = 0; i < 5; i++){
+        let x = Math.random() * innerWidth
+        let y = Math.random() * innerHeight
+        let dX = (Math.random() - 0.5) * 2
+        let dY = (Math.random() - 0.5) * 2
+        let radius = Math.floor(Math.random() * (10 - 2 + 1)) + 2 // max radius 2 - 10
+        circleArray.push(new Circle(x, y, dX, dY, radius, colors[Math.floor(Math.random() * colors.length)]))
+    }
+    animate()
+}
+
+init()
