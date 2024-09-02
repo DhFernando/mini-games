@@ -34,8 +34,9 @@ window.addEventListener('resize', () => {
 })
  
 let player;
-let enemy;
-let bulletArray = []
+// let enemy;
+let enemyArray = []
+const bulletArray = []
 let bulletIndex = 0
 let score = 0
 
@@ -54,27 +55,39 @@ addEventListener('click', ({ clientX }) => {
     bulletArray.push(new Bullet( {x: clientX}))
 })
 
+const clearBullet = (bulletIndex) => {
+    bulletArray.splice(bulletIndex, 1)
+}
+
+const distroyEnemy = (enemyIndex) => {
+    enemyArray.splice(enemyIndex, 1)
+}
 class Enemy {
-    constructor() {
+    constructor(prop) {
+        const { locationX, locationY } = prop;
         this.height = 50
         this.width = 50
         this.location = {
-            x: 100,
-            y: 100
+            x: locationX,
+            y: locationY
         } 
         this.dx = 1
         this.dy = 1
+        this.power = 100
     }
     draw() {
-        
-        c.beginPath()
+         
         c.fillStyle = 'red'
         c.fillRect(this.location.x, this.location.y, this.width, this.height)
-        
-        c.closePath()
+         
+        c.fillStyle = 'black'; // Text color
+        c.font = '20px Arial'; // Text font and size
+        c.textAlign = 'center'; // Center the text
+        c.textBaseline = 'middle'; // Vertically align text to the middle
+        c.fillText(this.power, this.location.x, this.location.y); // Draw the text
     } 
     update(){
-        if(score > 10){
+        if(score > 0){
             if(this.location.x + this.width > canvas.width || this.location.x < 0) {
                 this.dx = -this.dx
             }
@@ -84,14 +97,16 @@ class Enemy {
             this.location.x += this.dx
             this.location.y += this.dy
         }
+
+        if(this.power <= 0) {
+            distroyEnemy(this.index)
+        }
         
         this.draw()
     }
 }
 
-const clearBullet = (bulletIndex) => {
-    bulletArray.splice(bulletIndex, 1)
-}
+
 class Player {
     constructor() {
         this.height = 10
@@ -126,15 +141,14 @@ class Bullet {
         c.fillRect(this.x, this.y, this.width, this.height)
     } 
 
-    successBullet(){
-      if(enemy.location.y > this.y && (enemy.location.x < this.x && enemy.location.x + enemy.width > this.x)){
+    successBullet(e){
+      if(e.location.y > this.y && (e.location.x < this.x && e.location.x + e.width > this.x)){
         clearBullet(this.index)
         score++
         console.log(score)
         
         // reduce enemy size
-        enemy.width -= 2
-        enemy.height -= 2
+        e.power -= 10
         console.log('success')
       }
     }
@@ -145,7 +159,8 @@ class Bullet {
             // remove bullet from the array when it reach the top
             clearBullet(this.index)
         }
-        this.successBullet()
+
+        enemyArray.forEach(e => this.successBullet(e))
         this.draw()
     }
 }
@@ -157,15 +172,26 @@ const animate = () => {
     requestAnimationFrame(animate)  
  
     bulletArray.forEach(b => b.update())
-    enemy.update()
+    enemyArray.forEach(e => e.update())
+    // enemy.update()
     player.update()
     
 }
 
 const init = () => {  
-    player = new Player()
-    enemy = new Enemy()
+    player = new Player() 
+    enemyArray = [
+        new Enemy({
+            locationX: 300,
+            locationY: 100
+        }),
+        new Enemy({
+            locationX: 100,
+            locationY: 150
+        })
+    ] 
+    
     animate()
 }
-
+ 
 init()
