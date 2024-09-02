@@ -1,7 +1,7 @@
 var canvas = document.querySelector('canvas')
  
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+canvas.width = 500
+canvas.height = 500
 
 var c = canvas.getContext('2d')
 
@@ -54,75 +54,80 @@ window.addEventListener('resize', () => {
     canvas.height = window.innerHeight
     init()
 })
-
-const friction = 0.95
-const gravity = 1
-// Objects
-
-  
-class Ball{
-    constructor(x, y, dX, dY, radius, color){
-        this.x = x
-        this.y = y
-        this.dX = dX
-        this.dY = dY
-        this.radius = radius
-        this.color = color;
-        this.defaultRadius = radius; 
-    }
-
+ 
+/ 
+class Enemy {
     draw() {
-        c.beginPath()
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        c.fillStyle = this.color
-        c.fill()
-        c.closePath()
-    }
-    update() {
-        if(this.x + this.radius > innerWidth || this.x - this.radius < 0){
-            this.dX = -this.dX 
-            this.dY = this.dY * friction
-        }
-    
-        if(this.y + this.radius > innerHeight || this.y - this.radius < 0){
-            this.dY = -this.dY * friction
-            this.dX = this.dX * friction
-        }else{
-            this.dY = this.dY + gravity
-        }
-        
-    
-        this.x = this.x + this.dX
-        this.y = this.y + this.dY
 
-        console.log(this.dY)
+    }
+
+    update(){
+
+    }
+}
+const mouse = {
+    x: undefined,
+    y: undefined
+}
+addEventListener('mousemove', (event) => {
+    mouse.x = event.clientX
+    mouse.y = event.clientY
+})
+
+addEventListener('click', ({ clientX }) => { 
+    // release a bullet
+    bulletArray.push(new Bullet( {x: clientX}))
+})
+
+class Player {
+    constructor() {
+        this.height = 10
+        this.width = 10
+    }
+    draw() {
+        const { x, y } = mouse
+        c.fillRect(x, canvas.height - this.height, this.width, this.height)
+    }
+
+    update(){
         this.draw()
     }
 } 
+
+class Bullet {
+    constructor(prop) {
+        const {x} = prop;
+        this.height = 5
+        this.width = 5
+        this.velocity = 6
+        this.y = canvas.height - this.height + this.height
+        this.x = x
+    }
+    draw() { 
+        c.fillRect(this.x, this.y, this.width, this.height)
+    }
+
+    update(){
+        this.y = this.y - this.velocity
+        this.draw()
+    }
+}
  
-let circleArray = [] 
+let player;
+let bulletArray = []
+let bulletIndex = 0
 // Animation
 const animate = () => {
+    console.log(bulletArray.length)
     c.clearRect(0, 0, innerWidth, innerHeight)
     requestAnimationFrame(animate)  
-    circleArray.forEach(circle => {
-        circle.update()
-    })
+ 
+    bulletArray.forEach(b => b.update())
+    player.update()
 }
 
-const init = () => { 
-    circleArray = []
-    for(let i = 0; i < 100; i++){
-        var radius = randomIntFromRange(10, 50)
-        var x = randomIntFromRange(radius, canvas.width - radius)
-        var y = randomIntFromRange(radius, canvas.height - radius)
-        var dX = randomIntFromRange(-2, 2)
-        var dY = randomIntFromRange(-2, 2)
-        var color = randomColor()
-        circleArray.push(new Ball(x, y, dX, dY, radius, color))
-    }
-    var ball = new Ball(50, 50, 3, 3, 50, colors[Math.floor(Math.random() * colors.length)])
-    circleArray.push(ball)
+const init = () => {  
+    player = new Player()
     animate()
 }
 
