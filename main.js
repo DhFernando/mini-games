@@ -5,28 +5,6 @@ canvas.height = 500
 
 var c = canvas.getContext('2d')
 
-// c.fillStyle = 'rgba(255, 0, 0, 0.5)'
-// c.fillRect(100, 100, 100, 100)
-// c.fillStyle = 'rgba(0, 255, 0, 0.5)'
-// c.fillRect(400, 100, 100, 100)
-// c.fillStyle = 'rgba(0, 0, 255, 0.5)'
-// c.fillRect(300, 300, 100, 100)
-
-// // Line
-// c.beginPath()
-// c.moveTo(60, 70)
-// c.lineTo(200, 100)
-// c.lineTo(400, 300)
-// c.lineTo(300, 50)
-// c.strokeStyle = "#fa34a3"
-// c.stroke()
-
-// // Arc / Circle
-// c.beginPath()
-// c.arc(300, 300, 30, 0, Math.PI * 2, false)
-// c.strokeStyle = 'black'
-// c.stroke()
-
 const colors = [
     '#FF5733', // Vibrant Orange
     '#33FF57', // Lime Green
@@ -55,16 +33,12 @@ window.addEventListener('resize', () => {
     init()
 })
  
-/ 
-class Enemy {
-    draw() {
+let player;
+let enemy;
+let bulletArray = []
+let bulletIndex = 0
+let score = 0
 
-    }
-
-    update(){
-
-    }
-}
 const mouse = {
     x: undefined,
     y: undefined
@@ -75,20 +49,63 @@ addEventListener('mousemove', (event) => {
 })
 
 addEventListener('click', ({ clientX }) => { 
+    bulletIndex++;
     // release a bullet
     bulletArray.push(new Bullet( {x: clientX}))
 })
 
+class Enemy {
+    constructor() {
+        this.height = 50
+        this.width = 50
+        this.location = {
+            x: 100,
+            y: 100
+        } 
+        this.dx = 1
+        this.dy = 1
+    }
+    draw() {
+        
+        c.beginPath()
+        c.fillStyle = 'red'
+        c.fillRect(this.location.x, this.location.y, this.width, this.height)
+        
+        c.closePath()
+    } 
+    update(){
+        if(score > 10){
+            if(this.location.x + this.width > canvas.width || this.location.x < 0) {
+                this.dx = -this.dx
+            }
+            if(this.location.y + this.height > canvas.height/2 || this.location.y < 0) {
+                this.dy = -this.dy
+            }
+            this.location.x += this.dx
+            this.location.y += this.dy
+        }
+        
+        this.draw()
+    }
+}
+
+const clearBullet = (bulletIndex) => {
+    bulletArray.splice(bulletIndex, 1)
+}
 class Player {
     constructor() {
         this.height = 10
         this.width = 10
     }
     draw() {
-        const { x, y } = mouse
-        c.fillRect(x, canvas.height - this.height, this.width, this.height)
-    }
+        let { x, y } = mouse
+        if(x > canvas.width - this.width) {
+            x = canvas.width - this.width
+        }
 
+        c.fillStyle = 'black'
+        c.fillRect(x, canvas.height - this.height, this.width, this.height)
+    } 
     update(){
         this.draw()
     }
@@ -96,38 +113,58 @@ class Player {
 
 class Bullet {
     constructor(prop) {
-        const {x} = prop;
+        const {x, bulletIndex} = prop;
         this.height = 5
         this.width = 5
-        this.velocity = 6
+        this.velocity = 10
         this.y = canvas.height - this.height + this.height
         this.x = x
+        this.index = bulletIndex
     }
     draw() { 
+        c.fillStyle = 'black'
         c.fillRect(this.x, this.y, this.width, this.height)
+    } 
+
+    successBullet(){
+      if(enemy.location.y > this.y && (enemy.location.x < this.x && enemy.location.x + enemy.width > this.x)){
+        clearBullet(this.index)
+        score++
+        console.log(score)
+        
+        // reduce enemy size
+        enemy.width -= 2
+        enemy.height -= 2
+        console.log('success')
+      }
     }
 
     update(){
         this.y = this.y - this.velocity
+        if(this.y < 0) {
+            // remove bullet from the array when it reach the top
+            clearBullet(this.index)
+        }
+        this.successBullet()
         this.draw()
     }
 }
  
-let player;
-let bulletArray = []
-let bulletIndex = 0
+
 // Animation
 const animate = () => {
-    console.log(bulletArray.length)
     c.clearRect(0, 0, innerWidth, innerHeight)
     requestAnimationFrame(animate)  
  
     bulletArray.forEach(b => b.update())
+    enemy.update()
     player.update()
+    
 }
 
 const init = () => {  
     player = new Player()
+    enemy = new Enemy()
     animate()
 }
 
