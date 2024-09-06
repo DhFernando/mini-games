@@ -1,32 +1,7 @@
 var canvas = document.querySelector('canvas')
- 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-
-var c = canvas.getContext('2d')
-
-// c.fillStyle = 'rgba(255, 0, 0, 0.5)'
-// c.fillRect(100, 100, 100, 100)
-// c.fillStyle = 'rgba(0, 255, 0, 0.5)'
-// c.fillRect(400, 100, 100, 100)
-// c.fillStyle = 'rgba(0, 0, 255, 0.5)'
-// c.fillRect(300, 300, 100, 100)
-
-// // Line
-// c.beginPath()
-// c.moveTo(60, 70)
-// c.lineTo(200, 100)
-// c.lineTo(400, 300)
-// c.lineTo(300, 50)
-// c.strokeStyle = "#fa34a3"
-// c.stroke()
-
-// // Arc / Circle
-// c.beginPath()
-// c.arc(300, 300, 30, 0, Math.PI * 2, false)
-// c.strokeStyle = 'black'
-// c.stroke()
-
+canvas.width = 500
+canvas.height = 500 
+var c = canvas.getContext('2d')  
 const colors = [
     '#FF5733', // Vibrant Orange
     '#33FF57', // Lime Green
@@ -40,6 +15,7 @@ const colors = [
     '#33FFA1'  // Mint Green
   ];
 
+  
 
 const randomIntFromRange = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1) + min)
@@ -49,80 +25,133 @@ const randomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)]
 } 
 
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
-    init()
-})
-
+ 
 const friction = 0.95
 const gravity = 1
 // Objects
 
+
+addEventListener('keydown', (e) => {
+     console.log(e.keyCode)
+     snake.pressedKeyCode = e.keyCode; 
+     
+})
+
+let snake;
+let target;
+
+class Target{ 
+    constructor( ){
+        this.size = 10 
+        this.x = Math.floor(Math.random() * Math.floor(canvas.width/this.size)) * this.size 
+        this.y = Math.floor(Math.random() * Math.floor(canvas.width/this.size)) * this.size 
+    } 
+    draw() {
+        c.beginPath()
+        c.fillStyle = 'rgba(255, 0, 0, 0.5)'
+        c.fillRect(this.x, this.y, this.size, this.size) 
+        c.closePath()
+    }
+    update() { 
+
+        if(
+            (snake.x <= this.x + this.size && snake.x >= this.x || snake.x + snake.size >= this.x && snake.x + snake.size <= this.x + this.size) && 
+            (snake.y <= this.y + this.size && snake.y >= this.y || snake.y + snake.size >= this.y && snake.y + snake.size <= this.y + this.size)
+        ) {
+            target = null;
+        }else {
+            this.draw()
+        }  
+    }
+} 
+
+class Snake{ 
+    constructor( ){
+         this.x = 100
+         this.y = 100 
+         this.dx = 0
+         this.dy = 0
+         this.size = 10
+         this.velocity = 10
   
-class Ball{
-    constructor(x, y, dX, dY, radius, color){
-        this.x = x
-        this.y = y
-        this.dX = dX
-        this.dY = dY
-        this.radius = radius
-        this.color = color;
-        this.defaultRadius = radius; 
+         this.pressedKeyCode = null; 
+
+    }
+
+    playerInteractivity(keyCode) { 
+        if (keyCode === 87) { // w
+             
+            this.dy = -1;
+            this.dx = 0;
+        } else if (keyCode === 65) { // a
+             
+            this.dx = -1;
+            this.dy = 0;
+        } else if (keyCode === 83) { // s
+             
+            this.dy = 1;
+            this.dx = 0;
+        } else if (keyCode === 68) { // d
+             
+            this.dx = 1;
+            this.dy = 0;
+        } else if (keyCode === 32) { // space
+            this.dx = 0;
+            this.dy = 0;
+        }
+        
     }
 
     draw() {
         c.beginPath()
-        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-        c.fillStyle = this.color
-        c.fill()
+        c.fillStyle = 'rgba(255, 0, 0, 0.5)'
+        c.fillRect(this.x, this.y, this.size, this.size) 
         c.closePath()
     }
-    update() {
-        if(this.x + this.radius > innerWidth || this.x - this.radius < 0){
-            this.dX = -this.dX 
-            this.dY = this.dY * friction
-        }
-    
-        if(this.y + this.radius > innerHeight || this.y - this.radius < 0){
-            this.dY = -this.dY * friction
-            this.dX = this.dX * friction
-        }else{
-            this.dY = this.dY + gravity
-        }
-        
-    
-        this.x = this.x + this.dX
-        this.y = this.y + this.dY
+    update() { 
 
-        console.log(this.dY)
+        // to move y axios
+        if(this.dy === 0 && (this.pressedKeyCode === 87 || this.pressedKeyCode === 83) ){
+         
+            if(this.pressedKeyCode && (this.x) % this.size === 0){
+                this.playerInteractivity(this.pressedKeyCode)
+                this.pressedKeyCode = null;
+            }
+        }
+
+        if(this.dx === 0 && (this.pressedKeyCode === 65 || this.pressedKeyCode === 68)){
+            if(this.pressedKeyCode && this.y % this.size === 0){
+                this.playerInteractivity(this.pressedKeyCode)
+                this.pressedKeyCode = null;
+            }
+        }
+
+        this.x += this.dx
+        this.y += this.dy
         this.draw()
     }
 } 
  
-let circleArray = [] 
-// Animation
+  
+
+// setInterval(() => {
+//     c.clearRect(0, 0, canvas.width, canvas.height);
+//     snake.update() 
+// }, 1000)
 const animate = () => {
-    c.clearRect(0, 0, innerWidth, innerHeight)
-    requestAnimationFrame(animate)  
-    circleArray.forEach(circle => {
-        circle.update()
-    })
+    c.clearRect(0, 0, canvas.width, canvas.height)
+    requestAnimationFrame(animate) 
+    snake.update();
+    if(!target){
+        target = new Target()
+    } 
+    target.update(); 
+   
+    
 }
 
-const init = () => { 
-    circleArray = []
-    for(let i = 0; i < 100; i++){
-        var radius = randomIntFromRange(10, 50)
-        var x = randomIntFromRange(radius, canvas.width - radius)
-        var y = randomIntFromRange(radius, canvas.height - radius)
-        var dX = randomIntFromRange(-2, 2)
-        var dY = randomIntFromRange(-2, 2)
-        var color = randomColor()
-        circleArray.push(new Ball(x, y, dX, dY, radius, color))
-    }
-    var ball = new Ball(50, 50, 3, 3, 50, colors[Math.floor(Math.random() * colors.length)])
-    circleArray.push(ball)
+const init = () => {  
+    snake = new Snake() 
     animate()
 }
 
