@@ -28,36 +28,35 @@ const randomColor = () => {
  
 const friction = 0.95
 const gravity = 1
-// Objects
 
 
 addEventListener('keydown', (e) => {
-     console.log(e.keyCode)
-     snake.pressedKeyCode = e.keyCode; 
-     
+    //  console.log(e.keyCode)
+     snakeHead.pressedKeyCode = e.keyCode; 
 })
 
-let snake;
-let target;
 
+let size = 20
+let snakeHead;
+let target;
+let snakeHeadePath = []
 class Target{ 
     constructor( ){
-        this.size = 10 
-        this.x = Math.floor(Math.random() * Math.floor(canvas.width/this.size)) * this.size 
-        this.y = Math.floor(Math.random() * Math.floor(canvas.width/this.size)) * this.size 
+        this.x = Math.floor(Math.random() * Math.floor(canvas.width/size)) * size 
+        this.y = Math.floor(Math.random() * Math.floor(canvas.width/size)) * size 
     } 
     draw() {
         c.beginPath()
-        c.fillStyle = 'rgba(255, 0, 0, 0.5)'
-        c.fillRect(this.x, this.y, this.size, this.size) 
+        c.fillStyle = colors[0]
+        c.fillRect(this.x, this.y, size, size) 
         c.closePath()
     }
-    update() { 
-
+    update() {
         if(
-            (snake.x <= this.x + this.size && snake.x >= this.x || snake.x + snake.size >= this.x && snake.x + snake.size <= this.x + this.size) && 
-            (snake.y <= this.y + this.size && snake.y >= this.y || snake.y + snake.size >= this.y && snake.y + snake.size <= this.y + this.size)
+            (snakeHead.x <= this.x + size && snakeHead.x >= this.x || snakeHead.x + snakeHead.size >= this.x && snakeHead.x + snakeHead.size <= this.x + size) && 
+            (snakeHead.y <= this.y + size && snakeHead.y >= this.y || snakeHead.y + snakeHead.size >= this.y && snakeHead.y + snakeHead.size <= this.y + size)
         ) {
+            snakeBodyCellFactory() 
             target = null;
         }else {
             this.draw()
@@ -65,62 +64,134 @@ class Target{
     }
 } 
 
-class Snake{ 
+class SnakeBodyCell { 
+    constructor(x,y, dx, dy, cellIndex){
+        this.x = x
+        this.y = y
+        this.dx = dx
+        this.dy = dy 
+        this.pathInfo = null
+        this.cellIndex = cellIndex // is equle to the index of cell  array
+        this.cellPath = []
+        this.pathIndex = 0
+    } 
+    draw() {
+        c.beginPath()
+        c.fillStyle = colors[0]
+        c.fillRect(this.x, this.y, size, size) 
+        c.closePath()
+    }
+    update() {
+        if(this.cellIndex !== 0){
+            // this.pathInfo = snakeBodyCellArr
+            // console.log('hit')
+            // console.log(snakeBodyCellArr[this.cellIndex - 1].cellPath)
+            this.pathInfo = snakeBodyCellArr[this.cellIndex - 1].cellPath[this.pathIndex]
+            if(this.pathInfo){
+                console.log(this.pathInfo)
+                console.log(this.x, this.y)
+                if(this.x === this.pathInfo.x && this.y === this.pathInfo.y) {
+                    console.log('hit') 
+         
+                    // track the cell path
+                    this.cellPath.push(this.pathInfo); 
+                    this.pathIndex++
+                    this.dx = this.pathInfo.to.dx
+                    this.dy = this.pathInfo.to.dy
+                }
+            }
+
+        }else{
+            if(snakeHeadePath.length > 0) {
+                this.pathInfo = snakeHeadePath[0]
+                if(this.pathInfo){
+                    if(this.x === this.pathInfo.x && this.y === this.pathInfo.y) {
+                        // track the cell path
+                        this.cellPath.push(this.pathInfo);
+                        snakeHeadePath.shift()
+                        this.dx = this.pathInfo.to.dx
+                        this.dy = this.pathInfo.to.dy
+                    }
+                }
+             }
+        }
+       this.x += this.dx
+       this.y += this.dy
+       this.draw()
+   }
+
+     
+} 
+
+const leftKeys = [65, 37]
+const rightKeys = [68, 39]
+const upKeys = [87, 38]
+const downKeys = [83, 40]
+const snakeBodyCellArr = []
+const cellGap = 10;
+class SnakeHead{ 
     constructor( ){
          this.x = 100
          this.y = 100 
          this.dx = 0
          this.dy = 0
-         this.size = 10
-         this.velocity = 10
-  
-         this.pressedKeyCode = null; 
-
+         this.velocity = 10 
+         this.pressedKeyCode = null;  
     }
 
     playerInteractivity(keyCode) { 
-        if (keyCode === 87) { // w
-             
+        if (upKeys.includes(keyCode)) { // w s
             this.dy = -1;
             this.dx = 0;
-        } else if (keyCode === 65) { // a
-             
+            
+        } else if (leftKeys.includes(keyCode)) { // a 
             this.dx = -1;
             this.dy = 0;
-        } else if (keyCode === 83) { // s
-             
+        } else if (downKeys.includes(keyCode)) { // s 
             this.dy = 1;
             this.dx = 0;
-        } else if (keyCode === 68) { // d
-             
+        } else if (rightKeys.includes(keyCode)) { // d  
             this.dx = 1;
             this.dy = 0;
-        } else if (keyCode === 32) { // space
+        } else if (keyCode === 32 || keyCode === 87) { // space
             this.dx = 0;
             this.dy = 0;
         }
+        if(snakeBodyCellArr.length > 0) {
+           snakeHeadePath.push({
+                x: this.x,
+                y: this.y,
+                to: {
+                    dy: this.dy,
+                    dx: this.dx
+                }
+            }) 
+        }
+        
+
+        // console.log(snakeHeadePath)
         
     }
 
     draw() {
         c.beginPath()
         c.fillStyle = 'rgba(255, 0, 0, 0.5)'
-        c.fillRect(this.x, this.y, this.size, this.size) 
+        c.fillRect(this.x, this.y, size, size) 
         c.closePath()
     }
     update() { 
 
         // to move y axios
-        if(this.dy === 0 && (this.pressedKeyCode === 87 || this.pressedKeyCode === 83) ){
+        if(this.dy === 0 && (upKeys.includes(this.pressedKeyCode) || downKeys.includes(this.pressedKeyCode)) ){
          
-            if(this.pressedKeyCode && (this.x) % this.size === 0){
+            if(this.pressedKeyCode && (this.x) % size === 0){
                 this.playerInteractivity(this.pressedKeyCode)
                 this.pressedKeyCode = null;
             }
         }
-
-        if(this.dx === 0 && (this.pressedKeyCode === 65 || this.pressedKeyCode === 68)){
-            if(this.pressedKeyCode && this.y % this.size === 0){
+        // to move x axios
+        if(this.dx === 0 && (leftKeys.includes(this.pressedKeyCode) || rightKeys.includes(this.pressedKeyCode)) ){
+            if(this.pressedKeyCode && this.y % size === 0){
                 this.playerInteractivity(this.pressedKeyCode)
                 this.pressedKeyCode = null;
             }
@@ -131,27 +202,52 @@ class Snake{
         this.draw()
     }
 } 
- 
-  
+
+
+
+const snakeBodyCellFactory = () => {
+    snakeHeadePath = [] 
+    if(snakeBodyCellArr.length > 0) {
+        snakeBodyCellArr[snakeBodyCellArr.length - 1].cellPath = [];
+    }
+    const referenceObject = snakeBodyCellArr.length === 0 ? snakeHead : snakeBodyCellArr[snakeBodyCellArr.length - 1]
+    if(referenceObject.dx !== 0){
+        if(referenceObject.dx === -1 ){
+            snakeBodyCellArr.push(new SnakeBodyCell(referenceObject.x + (size + cellGap), referenceObject.y, referenceObject.dx, referenceObject.dy, snakeBodyCellArr.length))
+        } else{ 
+            snakeBodyCellArr.push(new SnakeBodyCell(referenceObject.x - (size + cellGap), referenceObject.y, referenceObject.dx, referenceObject.dy, snakeBodyCellArr.length))
+        }
+    }else {
+        if(referenceObject.dy === -1 ){
+            snakeBodyCellArr.push(new SnakeBodyCell(referenceObject.x , referenceObject.y + (size + cellGap), referenceObject.dx, referenceObject.dy, snakeBodyCellArr.length))
+        } else{ 
+            snakeBodyCellArr.push(new SnakeBodyCell(referenceObject.x , referenceObject.y - (size + cellGap), referenceObject.dx, referenceObject.dy, snakeBodyCellArr.length))
+        }
+    } 
+} 
 
 // setInterval(() => {
 //     c.clearRect(0, 0, canvas.width, canvas.height);
-//     snake.update() 
+//     snakeHead.update() 
+//     snakeBodyCellArr.forEach((cell) => {
+//         cell.update()
+//     })
 // }, 1000)
 const animate = () => {
     c.clearRect(0, 0, canvas.width, canvas.height)
     requestAnimationFrame(animate) 
-    snake.update();
+    snakeHead.update();
     if(!target){
         target = new Target()
     } 
-    target.update(); 
-   
-    
+    snakeBodyCellArr.forEach((cell) => {
+        cell.update()
+    })
+    target.update();  
 }
 
 const init = () => {  
-    snake = new Snake() 
+    snakeHead = new SnakeHead() 
     animate()
 }
 
