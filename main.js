@@ -16,6 +16,20 @@ const colors = [
   ];
 
   
+// Create an image object
+var targetImg = new Image(); 
+var snakeHeadUp = new Image(); 
+var snakeHeadDown = new Image(); 
+var snakeHeadLeft = new Image(); 
+var snakeHeadRight = new Image(); 
+
+// Set the source of the image
+targetImg.src = './assets/—Pngtree—mouse head vector_6256792.png';
+snakeHeadUp.src = './assets/snake-up.jpg';
+snakeHeadDown.src = './assets/snake-down.png';
+snakeHeadLeft.src = './assets/snake-left.jpg';
+snakeHeadRight.src = './assets/snake-right.jpg';
+
 
 const randomIntFromRange = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1) + min)
@@ -36,7 +50,7 @@ addEventListener('keydown', (e) => {
 })
 
 
-let size = 10
+let size = 20
 let snakeHead;
 let target;
 let snakeHeadePath = []
@@ -45,11 +59,8 @@ class Target{
         this.x = Math.floor(Math.random() * Math.floor(canvas.width/size)) * size 
         this.y = Math.floor(Math.random() * Math.floor(canvas.width/size)) * size 
     } 
-    draw() {
-        c.beginPath()
-        c.fillStyle = colors[0]
-        c.fillRect(this.x, this.y, size, size) 
-        c.closePath()
+    draw() { 
+        c.drawImage(targetImg, this.x, this.y, size ,size)
     }
     update() {
         if(
@@ -60,7 +71,6 @@ class Target{
             target = null;
         }else {
             this.draw()
-            
         }  
     }
 } 
@@ -78,9 +88,15 @@ class SnakeBodyCell {
     } 
     draw() {
         c.beginPath()
-        c.fillStyle = colors[9]   
-        c.fillRect(this.x, this.y, size, size) 
-        c.closePath()
+        c.fillStyle = 'brown'    
+        c.beginPath(); 
+    
+            // Draw the circle using arc()
+            c.arc(this.x + size/2, this.y + size/2, size/2, 0, Math.PI * 2, false);  
+            c.fill();
+         
+        // Close the path
+        c.closePath(); 
     }
     update() {
         if(this.cellIndex !== 0){
@@ -127,6 +143,8 @@ const upKeys = [87, 38]
 const downKeys = [83, 40]
 const snakeBodyCellArr = []
 const cellGap = 0;
+
+var snakeHeadIcon = snakeHeadDown;
 class SnakeHead{ 
     constructor( ){
          this.x = 100
@@ -141,16 +159,20 @@ class SnakeHead{
         if (upKeys.includes(keyCode)) { // w s
             this.dy = -1;
             this.dx = 0;
+            snakeHeadIcon = snakeHeadUp;
             
         } else if (leftKeys.includes(keyCode)) { // a 
             this.dx = -1;
             this.dy = 0;
+            snakeHeadIcon = snakeHeadLeft;
         } else if (downKeys.includes(keyCode)) { // s 
             this.dy = 1;
             this.dx = 0;
+            snakeHeadIcon = snakeHeadDown;
         } else if (rightKeys.includes(keyCode)) { // d  
             this.dx = 1;
             this.dy = 0;
+            snakeHeadIcon = snakeHeadRight;
         } else if (keyCode === 32 || keyCode === 87) { // space
             this.dx = 0;
             this.dy = 0;
@@ -172,6 +194,8 @@ class SnakeHead{
         c.fillStyle = colors[6]   
         c.fillRect(this.x, this.y, size, size) 
         c.closePath()
+
+        c.drawImage(snakeHeadIcon, this.x, this.y, size ,size)
     }
     update() { 
 
@@ -230,7 +254,7 @@ const animate = () => {
     snakeBodyCellArr.forEach((cell) => {
         cell.update()
     })
-
+ 
     target.update();  
 }
 
