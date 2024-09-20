@@ -36,7 +36,7 @@ addEventListener('keydown', (e) => {
 })
 
 
-let size = 20
+let size = 10
 let snakeHead;
 let target;
 let snakeHeadePath = []
@@ -60,6 +60,7 @@ class Target{
             target = null;
         }else {
             this.draw()
+            
         }  
     }
 } 
@@ -77,15 +78,12 @@ class SnakeBodyCell {
     } 
     draw() {
         c.beginPath()
-        c.fillStyle = colors[0]
+        c.fillStyle = colors[9]   
         c.fillRect(this.x, this.y, size, size) 
         c.closePath()
     }
     update() {
         if(this.cellIndex !== 0){
-            // this.pathInfo = snakeBodyCellArr
-            // console.log('hit')
-            // console.log(snakeBodyCellArr[this.cellIndex - 1].cellPath)
             this.pathInfo = snakeBodyCellArr[this.cellIndex - 1].cellPath[this.pathIndex]
             if(this.pathInfo){
                 console.log(this.pathInfo)
@@ -128,14 +126,14 @@ const rightKeys = [68, 39]
 const upKeys = [87, 38]
 const downKeys = [83, 40]
 const snakeBodyCellArr = []
-const cellGap = 10;
+const cellGap = 0;
 class SnakeHead{ 
     constructor( ){
          this.x = 100
          this.y = 100 
          this.dx = 0
          this.dy = 0
-         this.velocity = 10 
+         this.velocity = 30 
          this.pressedKeyCode = null;  
     }
 
@@ -167,15 +165,11 @@ class SnakeHead{
                 }
             }) 
         }
-        
-
-        // console.log(snakeHeadePath)
-        
     }
 
     draw() {
         c.beginPath()
-        c.fillStyle = 'rgba(255, 0, 0, 0.5)'
+        c.fillStyle = colors[6]   
         c.fillRect(this.x, this.y, size, size) 
         c.closePath()
     }
@@ -226,23 +220,17 @@ const snakeBodyCellFactory = () => {
     } 
 } 
 
-// setInterval(() => {
-//     c.clearRect(0, 0, canvas.width, canvas.height);
-//     snakeHead.update() 
-//     snakeBodyCellArr.forEach((cell) => {
-//         cell.update()
-//     })
-// }, 1000)
 const animate = () => {
     c.clearRect(0, 0, canvas.width, canvas.height)
     requestAnimationFrame(animate) 
-    snakeHead.update();
+    snakeHead.update(); 
     if(!target){
         target = new Target()
     } 
     snakeBodyCellArr.forEach((cell) => {
         cell.update()
     })
+
     target.update();  
 }
 
